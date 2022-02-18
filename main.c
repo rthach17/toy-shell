@@ -77,6 +77,13 @@ int get_alias_cmd_pos(char *cmd) {
   return -1;
 }
 
+void display_aliases(void) {
+  for (int i = 0; i < ALIAS_SIZE; i++)  // Displays all aliases
+  {
+    printf("Alias %d: %s - %s\n", i+1, alias_list[i], alias_commands[i]);
+  }
+}
+
 /*
   Builtin function implementations.
 */
@@ -162,21 +169,36 @@ int newname(char **args)
 {
 	if (args[1] == NULL) {
 		fprintf(stderr, "lsh: expected argument to \"newname\"\n");
-  } else if (args[2] == NULL) {	// one argument: remove alias
-  		//TODO
+  } else if (args[2] == NULL) {	  // one argument: remove alias
+    char *alias = args[1];
+    int alias_pos = get_alias_list_pos(alias);
 
-  } else if (args[3] == NULL) {	// two arguments: add or replace alias
+    if (alias_pos == -1) {
+      fprintf(stderr, "lsh: the alias \"%s\" does not exist\n", alias);
+    } else {
+      alias_list[alias_pos] = "\0";
+      alias_commands[alias_pos] = "\0";
+
+      display_aliases();
+    }
+  } else if (args[3] == NULL) {	  // two arguments: add or replace alias
 	  char *alias_new = args[1];
     char *alias_cmd = args[2];
+    
+    int alias_cmd_pos = get_alias_cmd_pos(alias_cmd);
+    int alias_new_pos = get_alias_list_pos(alias_new);
 
-    int alias_pos = get_alias_cmd_pos(alias_cmd);
-    if (alias_pos != -1) {
-      alias_list[alias_pos] = alias_new;
-      alias_commands[alias_pos] = alias_cmd;
+    if (alias_new_pos != -1) {                // Replace command for an existing alias
+      alias_list[alias_new_pos] = alias_new;
+      alias_commands[alias_new_pos] = alias_cmd;
+
+    } else if (alias_cmd_pos != -1) {         // Replace alias for corresponding command
+      alias_list[alias_cmd_pos] = alias_new;
+      alias_commands[alias_cmd_pos] = alias_cmd;
+
     } else {
+      int alias_added = 0;                               // Add new alias
       for (int i = 0; i < ALIAS_SIZE; i++) {
-        int alias_added = 0;
-
         if (strcmp(alias_list[i], "\0") == 0) {
           alias_list[i] = alias_new;
           alias_commands[i] = alias_cmd;
@@ -186,13 +208,13 @@ int newname(char **args)
         if (alias_added)
           break;
       }
+
+      if (!alias_added) {
+        fprintf(stderr, "lsh: max number of aliases exceeded (%d)\n", ALIAS_SIZE);
+      }
     }
 
-		for (int i = 0; i < ALIAS_SIZE; i++)	// Displays all aliases
-		{
-			printf("Alias %d: %s - %s\n", i+1, alias_list[i], alias_commands[i]);
-		}
-
+    display_aliases();
 	} else {
 		fprintf(stderr, "lsh: too many arguments to \"newname\"\n");
 	}
