@@ -136,6 +136,12 @@ int newname(char **args)
 {
 	if (args[1] == NULL) {
 		fprintf(stderr, "lsh: expected argument to \"newname\"\n");
+  	} else if (args[2] == NULL) {	// one argument
+  		printf("newname <new_name>\n");  
+  	} else if (args[3] == NULL) {	// two arguments
+  		printf("newname <new_name> <old_name>\n");
+  	} else {
+  		fprintf(stderr, "lsh: too many arguments to \"newname\"\n");
   	}
 
   	return 1;
