@@ -34,7 +34,7 @@ char *builtin_str[] = {
 int (*builtin_func[]) (char **) = {
   &lsh_cd,
   &lsh_help,
-  &lsh_stop,
+  &stop,
   &setshellname
 };
 
@@ -88,7 +88,7 @@ int lsh_help(char **args)
    @param args List of args.  Not examined.
    @return Always returns 0, to terminate execution.
  */
-int lsh_stop(char **args)
+int stop(char **args)
 {
   return 0;
 }
