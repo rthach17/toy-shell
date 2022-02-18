@@ -151,8 +151,6 @@ int newname(char **args)
   	} else if (args[2] == NULL) {	// one argument: remove alias
   		//TODO
 
-  		
-
   	} else if (args[3] == NULL) {	// two arguments: add or replace alias
   		char *new_alias = args[1];
   		char *old_alias = args[2];
@@ -160,8 +158,9 @@ int newname(char **args)
   		int alias_pos = get_alias_pos(old_alias);
   		if (alias_pos == -1)
   			printf("Alias does not exist!\n");
-  		else
-  			printf("Alias exists! Success!\n");
+  		else {
+  			aliases[alias_pos] = new_alias;
+      }
 
   		/*
   		for (int i = 0; i < ALIAS_SIZE; i++)	// Adds new_alias to aliases
