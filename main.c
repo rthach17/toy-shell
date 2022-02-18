@@ -16,10 +16,8 @@
 char *shellname = "myshell";
 char *terminator = ">";
 const int ALIAS_SIZE = 10;
-char *alias_list[ALIAS_SIZE] = { "\0", "\0", "\0", "\0", "\0", 
-                              "\0", "\0", "\0", "\0", "\0" };
-char *alias_commands[ALIAS_SIZE] = { "\0", "\0", "\0", "\0", "\0", 
-                              "\0", "\0", "\0", "\0", "\0" };
+char *alias_names[ALIAS_SIZE] = { "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0" };
+char *alias_commands[ALIAS_SIZE] = { "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0" };
 
 /*
   Function Declarations for builtin shell commands:
@@ -57,10 +55,10 @@ int lsh_num_builtins() {
 
 //void add_alias(char *alias, char *cmd)
 
-int get_alias_list_pos(char *alias) {
+int get_alias_names_pos(char *alias) {
   for (int i = 0; i < ALIAS_SIZE; i++)
   {
-    if (strcmp(alias_list[i], alias) == 0)
+    if (strcmp(alias_names[i], alias) == 0)
       return i;
   }
 
@@ -80,7 +78,7 @@ int get_alias_cmd_pos(char *cmd) {
 void display_aliases(void) {
   for (int i = 0; i < ALIAS_SIZE; i++)  // Displays all aliases
   {
-    printf("Alias %d: %s - %s\n", i+1, alias_list[i], alias_commands[i]);
+    printf("Alias %d: %s - %s\n", i+1, alias_names[i], alias_commands[i]);
   }
 }
 
@@ -171,12 +169,12 @@ int newname(char **args)
 		fprintf(stderr, "lsh: expected argument to \"newname\"\n");
   } else if (args[2] == NULL) {	  // one argument: remove alias
     char *alias = args[1];
-    int alias_pos = get_alias_list_pos(alias);
+    int alias_pos = get_alias_names_pos(alias);
 
     if (alias_pos == -1) {
       fprintf(stderr, "lsh: the alias \"%s\" does not exist\n", alias);
     } else {
-      alias_list[alias_pos] = "\0";
+      alias_names[alias_pos] = "\0";
       alias_commands[alias_pos] = "\0";
 
       display_aliases();
@@ -186,21 +184,21 @@ int newname(char **args)
     char *alias_cmd = args[2];
     
     int alias_cmd_pos = get_alias_cmd_pos(alias_cmd);
-    int alias_new_pos = get_alias_list_pos(alias_new);
+    int alias_new_pos = get_alias_names_pos(alias_new);
 
     if (alias_new_pos != -1) {                // Replace command for an existing alias
-      alias_list[alias_new_pos] = alias_new;
+      alias_names[alias_new_pos] = alias_new;
       alias_commands[alias_new_pos] = alias_cmd;
 
     } else if (alias_cmd_pos != -1) {         // Replace alias for corresponding command
-      alias_list[alias_cmd_pos] = alias_new;
+      alias_names[alias_cmd_pos] = alias_new;
       alias_commands[alias_cmd_pos] = alias_cmd;
 
     } else {
-      int alias_added = 0;                               // Add new alias
+      int alias_added = 0;                    // Add new alias
       for (int i = 0; i < ALIAS_SIZE; i++) {
-        if (strcmp(alias_list[i], "\0") == 0) {
-          alias_list[i] = alias_new;
+        if (strcmp(alias_names[i], "\0") == 0) {
+          alias_names[i] = alias_new;
           alias_commands[i] = alias_cmd;
           alias_added = 1;
         }
@@ -267,7 +265,13 @@ int lsh_execute(char **args)
     return 1;
   }
 
-  // if args is an alias, change args into alias cmd value
+  // If alias exists, replace 'arg' with corresponding command from list
+  for (int i = 0; i < ALIAS_SIZE; i++)  
+  {
+    if (strcmp(args[0], alias_names[i]) == 0) {
+      args[0] = alias_commands[i];
+    }
+  }
 
   for (i = 0; i < lsh_num_builtins(); i++) {
     if (strcmp(args[0], builtin_str[i]) == 0) {
