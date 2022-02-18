@@ -186,7 +186,7 @@ int newname(char **args)
       alias_names[alias_pos] = "\0";
       alias_commands[alias_pos] = "\0";
 
-      display_aliases();
+      //display_aliases();
     }
   } else if (args[3] == NULL) {	  // two arguments: add or replace alias
 	  char *alias_new = args[1];
@@ -222,7 +222,7 @@ int newname(char **args)
       }
     }
 
-    display_aliases();
+    //display_aliases();
 	} else {
 		fprintf(stderr, "lsh: too many arguments to \"newname\"\n");
 	}
@@ -235,7 +235,11 @@ int newname(char **args)
  */
 int listnewnames(char **args)
 {
-  printf("this is listnewnames command\n");
+  for (int i = 0; i < ALIAS_SIZE; i++)
+  {
+    if (strcmp(alias_names[i], "\0") != 0)
+      printf("%s %s\n", alias_names[i], alias_commands[i]);
+  }
 
   return 1;
 }
