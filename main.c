@@ -19,7 +19,7 @@ char *shellname = "myshell";
  */
 int lsh_cd(char **args);
 int lsh_help(char **args);
-int lsh_exit(char **args);
+int stop(char **args);
 int setshellname(char **args);
 /*
   List of builtin commands, followed by their corresponding functions.
@@ -27,14 +27,14 @@ int setshellname(char **args);
 char *builtin_str[] = {
   "cd",
   "help",
-  "exit",
+  "stop",
   "setshellname"
 };
 
 int (*builtin_func[]) (char **) = {
   &lsh_cd,
   &lsh_help,
-  &lsh_exit,
+  &lsh_stop,
   &setshellname
 };
 
@@ -84,11 +84,11 @@ int lsh_help(char **args)
 }
 
 /**
-   @brief Builtin command: exit.
+   @brief Builtin command: stop.
    @param args List of args.  Not examined.
    @return Always returns 0, to terminate execution.
  */
-int lsh_exit(char **args)
+int lsh_stop(char **args)
 {
   return 0;
 }
