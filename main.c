@@ -16,7 +16,9 @@
 char *shellname = "myshell";
 char *terminator = ">";
 const int ALIAS_SIZE = 10;
-char *aliases[ALIAS_SIZE] = { "\0", "\0", "\0", "\0", "\0", 
+char *alias_list[ALIAS_SIZE] = { "\0", "\0", "\0", "\0", "\0", 
+                              "\0", "\0", "\0", "\0", "\0" };
+char *alias_commands[ALIAS_SIZE] = { "\0", "\0", "\0", "\0", "\0", 
                               "\0", "\0", "\0", "\0", "\0" };
 
 /*
@@ -53,12 +55,23 @@ int lsh_num_builtins() {
   return sizeof(builtin_str) / sizeof(char *);
 }
 
-int get_alias_pos(char *alias) {
-  for (int i = 0; i < lsh_num_builtins(); i++)
+//void add_alias(char *alias, char *cmd)
+
+int get_alias_list_pos(char *alias) {
+  for (int i = 0; i < ALIAS_SIZE; i++)
   {
-  	if (strcmp(alias, builtin_str[i]) == 0) {
-  		return i;
-  	}
+    if (strcmp(alias_list[i], alias) == 0)
+      return i;
+  }
+
+  return -1;
+}
+
+int get_alias_cmd_pos(char *cmd) {
+  for (int i = 0; i < ALIAS_SIZE; i++)
+  {
+    if (strcmp(alias_commands[i], cmd) == 0)
+      return i;
   }
 
   return -1;
@@ -149,44 +162,42 @@ int newname(char **args)
 {
 	if (args[1] == NULL) {
 		fprintf(stderr, "lsh: expected argument to \"newname\"\n");
-  	} else if (args[2] == NULL) {	// one argument: remove alias
+  } else if (args[2] == NULL) {	// one argument: remove alias
   		//TODO
 
-  	} else if (args[3] == NULL) {	// two arguments: add or replace alias
-  		char *new_alias = args[1];
-  		char *old_alias = args[2];
+  } else if (args[3] == NULL) {	// two arguments: add or replace alias
+	  char *alias_new = args[1];
+    char *alias_cmd = args[2];
 
-  		int alias_pos = get_alias_pos(old_alias);
-  		if (alias_pos == -1)
-  			printf("Alias does not exist!\n");
-  		else {
-  			aliases[alias_pos] = new_alias;
+    int alias_pos = get_alias_cmd_pos(alias_cmd);
+    if (alias_pos != -1) {
+      alias_list[alias_pos] = alias_new;
+      alias_commands[alias_pos] = alias_cmd;
+    } else {
+      for (int i = 0; i < ALIAS_SIZE; i++) {
+        int alias_added = 0;
+
+        if (strcmp(alias_list[i], "\0") == 0) {
+          alias_list[i] = alias_new;
+          alias_commands[i] = alias_cmd;
+          alias_added = 1;
+        }
+
+        if (alias_added)
+          break;
       }
+    }
 
-  		/*
-  		for (int i = 0; i < ALIAS_SIZE; i++)	// Adds new_alias to aliases
-  		{
-  			int alias_added = 0;
+		for (int i = 0; i < ALIAS_SIZE; i++)	// Displays all aliases
+		{
+			printf("Alias %d: %s - %s\n", i+1, alias_list[i], alias_commands[i]);
+		}
 
-  			if (aliases[i] == NULL) {
-  				aliases[i] = new_alias;
-  				alias_added = 1;
-  			}
+	} else {
+		fprintf(stderr, "lsh: too many arguments to \"newname\"\n");
+	}
 
-  			if (alias_added)
-  				break;
-  		} 
-  		*/
-
-  		for (int i = 0; i < ALIAS_SIZE; i++)	// Displays all aliases
-  		{
-  			printf("Alias %d: %s\n", i+1, aliases[i]);
-  		}
-  	} else {
-  		fprintf(stderr, "lsh: too many arguments to \"newname\"\n");
-  	}
-
-  	return 1;
+  return 1;
 }
 
 
@@ -233,6 +244,8 @@ int lsh_execute(char **args)
     // An empty command was entered.
     return 1;
   }
+
+  // if args is an alias, change args into alias cmd value
 
   for (i = 0; i < lsh_num_builtins(); i++) {
     if (strcmp(args[0], builtin_str[i]) == 0) {
