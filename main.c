@@ -265,7 +265,7 @@ int lsh_execute(char **args)
     return 1;
   }
 
-  // If alias exists, replace 'arg' with corresponding command from list
+  // If alias exists, replace 'args[0]' with corresponding command from list
   for (int i = 0; i < ALIAS_SIZE; i++)  
   {
     if (strcmp(args[0], alias_names[i]) == 0) {
