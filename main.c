@@ -16,7 +16,8 @@
 char *shellname = "myshell";
 char *terminator = ">";
 const int ALIAS_SIZE = 10;
-char *aliases[ALIAS_SIZE];
+char *aliases[ALIAS_SIZE] = { "\0", "\0", "\0", "\0", "\0", 
+                              "\0", "\0", "\0", "\0", "\0" };
 
 /*
   Function Declarations for builtin shell commands:
