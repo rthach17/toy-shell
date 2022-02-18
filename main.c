@@ -15,7 +15,8 @@
 // Global variables used by built-in shell commands:
 char *shellname = "myshell";
 char *terminator = ">";
-char *aliases[] = {};
+const int ALIAS_SIZE = 10;
+char *aliases[ALIAS_SIZE];
 
 /*
   Function Declarations for builtin shell commands:
@@ -50,6 +51,18 @@ int (*builtin_func[]) (char **) = {
 int lsh_num_builtins() {
   return sizeof(builtin_str) / sizeof(char *);
 }
+
+int alias_exists(char *alias) {
+  for (int i = 0; i < lsh_num_builtins(); i++)
+  {
+  	if (strcmp(alias, builtin_str[i]) == 0) {
+  		return 1;
+  	}
+  }
+
+  return 0;
+}
+
 
 /*
   Builtin function implementations.
@@ -136,10 +149,40 @@ int newname(char **args)
 {
 	if (args[1] == NULL) {
 		fprintf(stderr, "lsh: expected argument to \"newname\"\n");
-  	} else if (args[2] == NULL) {	// one argument
-  		printf("newname <new_name>\n");  
-  	} else if (args[3] == NULL) {	// two arguments
-  		printf("newname <new_name> <old_name>\n");
+  	} else if (args[2] == NULL) {	// one argument: remove alias
+  		//TODO
+
+  		
+
+  	} else if (args[3] == NULL) {	// two arguments: add or replace alias
+  		char *new_alias = args[1];
+  		char *old_alias = args[2];
+  		int alias_pos;
+
+  		if (alias_exists(old_alias))
+  			printf("Alias exists!\n");
+  		else
+  			printf("Alias does not exist.\n");
+
+  		/*
+  		for (int i = 0; i < ALIAS_SIZE; i++)	// Adds new_alias to aliases
+  		{
+  			int alias_added = 0;
+
+  			if (aliases[i] == NULL) {
+  				aliases[i] = new_alias;
+  				alias_added = 1;
+  			}
+
+  			if (alias_added)
+  				break;
+  		} 
+  		*/
+
+  		for (int i = 0; i < ALIAS_SIZE; i++)	// Displays all aliases
+  		{
+  			printf("Alias %d: %s\n", i+1, aliases[i]);
+  		}
   	} else {
   		fprintf(stderr, "lsh: too many arguments to \"newname\"\n");
   	}
