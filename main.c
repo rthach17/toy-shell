@@ -28,6 +28,9 @@ int stop(char **args);
 int setshellname(char **args);
 int setterminator(char **args);
 int newname(char **args);
+int listnewnames(char **args);
+int savenewnames(char **args);
+int readnewnames(char **args);
 /*
   List of builtin commands, followed by their corresponding functions.
  */
@@ -37,7 +40,10 @@ char *builtin_str[] = {
   "stop",
   "setshellname",
   "setterminator",
-  "newname"
+  "newname",
+  "listnewnames",
+  "savenewnames",
+  "readnewnames"
 };
 
 int (*builtin_func[]) (char **) = {
@@ -46,7 +52,10 @@ int (*builtin_func[]) (char **) = {
   &stop,
   &setshellname,
   &setterminator,
-  &newname
+  &newname,
+  &listnewnames,
+  &savenewnames,
+  &readnewnames
 };
 
 int lsh_num_builtins() {
@@ -186,6 +195,7 @@ int newname(char **args)
     int alias_cmd_pos = get_alias_cmd_pos(alias_cmd);
     int alias_new_pos = get_alias_names_pos(alias_new);
 
+    // TODO: make function for adding and removing aliases
     if (alias_new_pos != -1) {                // Replace command for an existing alias
       alias_names[alias_new_pos] = alias_new;
       alias_commands[alias_new_pos] = alias_cmd;
@@ -216,6 +226,36 @@ int newname(char **args)
 	} else {
 		fprintf(stderr, "lsh: too many arguments to \"newname\"\n");
 	}
+
+  return 1;
+}
+
+/*
+ *
+ */
+int listnewnames(char **args)
+{
+  printf("this is listnewnames command\n");
+
+  return 1;
+}
+
+/*
+ *
+ */
+int savenewnames(char **args)
+{
+  printf("this is savenewnames command\n");
+
+  return 1;
+}
+
+/*
+ *
+ */
+int readnewnames(char **args)
+{
+  printf("this is readnewnames command\n");
 
   return 1;
 }
