@@ -52,17 +52,16 @@ int lsh_num_builtins() {
   return sizeof(builtin_str) / sizeof(char *);
 }
 
-int alias_exists(char *alias) {
+int get_alias_pos(char *alias) {
   for (int i = 0; i < lsh_num_builtins(); i++)
   {
   	if (strcmp(alias, builtin_str[i]) == 0) {
-  		return 1;
+  		return i;
   	}
   }
 
-  return 0;
+  return -1;
 }
-
 
 /*
   Builtin function implementations.
@@ -157,12 +156,12 @@ int newname(char **args)
   	} else if (args[3] == NULL) {	// two arguments: add or replace alias
   		char *new_alias = args[1];
   		char *old_alias = args[2];
-  		int alias_pos;
 
-  		if (alias_exists(old_alias))
-  			printf("Alias exists!\n");
+  		int alias_pos = get_alias_pos(old_alias);
+  		if (alias_pos == -1)
+  			printf("Alias does not exist!\n");
   		else
-  			printf("Alias does not exist.\n");
+  			printf("Alias exists! Success!\n");
 
   		/*
   		for (int i = 0; i < ALIAS_SIZE; i++)	// Adds new_alias to aliases
