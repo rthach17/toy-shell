@@ -12,7 +12,9 @@
 #include <stdio.h>
 #include <string.h>
 
+// Global Variables used for Shell
 char *shellname = "myshell";
+char *terminator = ">";
 
 /*
   Function Declarations for builtin shell commands:
@@ -21,6 +23,7 @@ int lsh_cd(char **args);
 int lsh_help(char **args);
 int stop(char **args);
 int setshellname(char **args);
+int setterminator(char **args);
 /*
   List of builtin commands, followed by their corresponding functions.
  */
@@ -28,14 +31,16 @@ char *builtin_str[] = {
   "cd",
   "help",
   "stop",
-  "setshellname"
+  "setshellname",
+  "setterminator"
 };
 
 int (*builtin_func[]) (char **) = {
   &lsh_cd,
   &lsh_help,
   &stop,
-  &setshellname
+  &setshellname,
+  &setterminator
 };
 
 int lsh_num_builtins() {
@@ -106,6 +111,19 @@ int setshellname(char **args)
 	return 1;
 }
 
+/*
+ *
+ */
+int setterminator(char **args)
+{
+	if (args[1] == NULL) {
+		terminator = ">";
+	} else {
+		terminator = args[1];
+	}
+
+	return 1;
+}
 
 
 /**
@@ -268,7 +286,7 @@ void lsh_loop(void)
   int status;
 
   do {
-    printf("%s > ", shellname);
+    printf("%s %s ", shellname, terminator);
     line = lsh_read_line();
     args = lsh_split_line(line);
     status = lsh_execute(args);
