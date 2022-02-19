@@ -29,6 +29,7 @@
  */
 char *shellname = "myshell";
 char *terminator = ">";
+// Alias entry list
 char *alias_names[ALIAS_SIZE] = { "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0" };
 char *alias_commands[ALIAS_SIZE] = { "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0" };
 
@@ -72,12 +73,13 @@ int (*builtin_func[]) (char **) = {
   &readnewnames
 };
 
-/*
-  Helper functions that assist with builtin command implementation
-*/
 int lsh_num_builtins() {
   return sizeof(builtin_str) / sizeof(char *);
 }
+
+/*
+  Helper functions that assist with builtin command implementation
+*/
 
 /**
    Purpose: Retrieves index of string found in list of strings (array)
@@ -98,6 +100,13 @@ int get_index_from_list(char *str, char *list[], int size) {
   return -1;
 }
 
+/**
+   Purpose: Add alias to list of alias entries
+
+   @param alias Name of new alias
+          command Name of corresponding command
+   @return void
+ */
 void add_alias(char* alias, char* command)
 {
   char *alias_new = alias;
@@ -144,6 +153,13 @@ void add_alias(char* alias, char* command)
   }
 }
 
+/**
+   Purpose: Remove alias entry from list of aliases
+
+   @param alias Name of new alias
+          command Name of corresponding command
+   @return void
+ */
 void remove_alias(char *alias)
 {
     int alias_index = get_index_from_list(alias, alias_names, ALIAS_SIZE);
