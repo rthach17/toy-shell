@@ -249,10 +249,14 @@ int listnewnames(char **args)
  */
 int savenewnames(char **args)
 {
-  FILE *fp = fopen("aliases.txt", "w");
+  if (args[1] == NULL) {
+    fprintf(stderr, "lsh: expected argument to \"savenewnames\"\n");
+    return 1;
+  }
 
+  FILE *fp = fopen(args[1], "w");
   if(fp == NULL) {
-    fprintf(stderr, "lsh: unable to save file");
+    fprintf(stderr, "lsh: file pointer error\n");
     return 1;
   }
 
