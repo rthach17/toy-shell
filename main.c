@@ -249,7 +249,20 @@ int listnewnames(char **args)
  */
 int savenewnames(char **args)
 {
-  printf("this is savenewnames command\n");
+  FILE *fp = fopen("aliases.txt", "w");
+
+  if(fp == NULL) {
+    fprintf(stderr, "lsh: unable to save file");
+    return 1;
+  }
+
+  for (int i = 0; i < ALIAS_SIZE; i++)
+  {
+    if (strcmp(alias_names[i], "\0") != 0)
+      fprintf(fp, "%s %s\n", alias_names[i], alias_commands[i]);
+  }
+
+  fclose(fp);
 
   return 1;
 }
