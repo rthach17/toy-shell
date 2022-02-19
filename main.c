@@ -5,12 +5,16 @@
  * Original Program: LSH (Libstephen SHell)
 *******************************************************************************/
 
-/****************************************
+/************************************************************
+ * Name: Ravy Thach
+ * ID: 004992997
+ * Date: 2/21/2022
  * 
+ * Purpose: A shell program, TSH (Toy SHell), that 
+ *          can execute custom built-in commands 
+ *          as well as UNIX commands.
  * 
- * 
- * 
-****************************************/
+************************************************************/
 
 #include <sys/wait.h>
 #include <sys/types.h>
@@ -19,7 +23,9 @@
 #include <stdio.h>
 #include <string.h>
 
-// Global variables used by built-in shell commands:
+/*
+  Global variables used by built-in shell commands:
+ */
 char *shellname = "myshell";
 char *terminator = ">";
 const int ALIAS_SIZE = 10;
@@ -38,6 +44,7 @@ int newname(char **args);
 int listnewnames(char **args);
 int savenewnames(char **args);
 int readnewnames(char **args);
+
 /*
   List of builtin commands, followed by their corresponding functions.
  */
@@ -65,13 +72,21 @@ int (*builtin_func[]) (char **) = {
   &readnewnames
 };
 
+/*
+  Helper functions that assist with builtin command implementation
+*/
 int lsh_num_builtins() {
   return sizeof(builtin_str) / sizeof(char *);
 }
 
-//void add_alias(char *alias, char *cmd)
+/**
+   Purpose: Retrieves index of alias from alias_names list
 
-int get_alias_names_pos(char *alias) {
+   @param alias String of alias to check
+   @return If alias found, returns index
+   @return if alias not found, returns -1
+ */
+int get_alias_index(char *alias) {
   for (int i = 0; i < ALIAS_SIZE; i++)
   {
     if (strcmp(alias_names[i], alias) == 0)
@@ -81,7 +96,14 @@ int get_alias_names_pos(char *alias) {
   return -1;
 }
 
-int get_alias_cmd_pos(char *cmd) {
+/**
+   Purpose: Retrieve index of command from alias_commands list
+
+   @param alias String of command to check
+   @return If command found, returns index
+   @return if command not found, returns -1
+ */
+int get_cmd_index(char *cmd) {
   for (int i = 0; i < ALIAS_SIZE; i++)
   {
     if (strcmp(alias_commands[i], cmd) == 0)
@@ -91,43 +113,40 @@ int get_alias_cmd_pos(char *cmd) {
   return -1;
 }
 
-void display_aliases(void) {
-  for (int i = 0; i < ALIAS_SIZE; i++)  // Displays all aliases
-  {
-    printf("Alias %d: %s - %s\n", i+1, alias_names[i], alias_commands[i]);
-  }
-}
-
 /*
   Builtin function implementations.
 */
 
 /**
-   @brief Bultin command: change directory.
+   Purpose: Changes the current directory.
+
+   @brief Builtin command: cd
    @param args List of args.  args[0] is "cd".  args[1] is the directory.
    @return Always returns 1, to continue executing.
  */
 int lsh_cd(char **args)
 {
   if (args[1] == NULL) {
-    fprintf(stderr, "lsh: expected argument to \"cd\"\n");
+    fprintf(stderr, "tsh: expected argument to \"cd\"\n");
   } else {
     if (chdir(args[1]) != 0) {
-      perror("lsh");
+      perror("tsh");
     }
   }
   return 1;
 }
 
 /**
-   @brief Builtin command: print help.
+   Purpose: Displays all built-in commands that the user can execute.
+
+   @brief Builtin command: help
    @param args List of args.  Not examined.
    @return Always returns 1, to continue executing.
  */
 int lsh_help(char **args)
 {
   int i;
-  printf("Stephen Brennan's LSH\n");
+  printf("Toy SHell\n");
   printf("Type program names and arguments, and hit enter.\n");
   printf("The following are built in:\n");
 
@@ -140,9 +159,11 @@ int lsh_help(char **args)
 }
 
 /**
-   @brief Builtin command: stop.
+   Purpose: Terminates execution of Toy SHell.
+
+   @brief: Builtin command: stop
    @param args List of args.  Not examined.
-   @return Always returns 0, to terminate execution.
+   @return Always returns 0
  */
 int stop(char **args)
 {
@@ -150,7 +171,12 @@ int stop(char **args)
 }
 
 /**
- *
+   Purpose: Set a custom shell name for the command prompt. If no arg is passed, 
+            change to default shell name "myshell".
+
+   @brief: Builtin command: setshellname <name>
+   @param args List of args.  args[0] is "setshellname".  args[1] is custom shell name.
+   @return Always returns 1, to continue executing.
  */
 int setshellname(char **args)
 {
@@ -162,8 +188,13 @@ int setshellname(char **args)
 	return 1;
 }
 
-/*
- *
+/**
+   Purpose: Set a custom terminator for the command prompt. If no arg is passed,
+            change to default terminator ">".
+
+   @brief: Builtin command: setterminator <name>
+   @param args List of args. args[0] is "setterminator". args[1] is custom terminator name.
+   @return Always returns 1, to continue executing.
  */
 int setterminator(char **args)
 {
@@ -176,31 +207,37 @@ int setterminator(char **args)
 	return 1;
 }
 
-/*
- *
+/**
+   Purpose: Define a custom alias that the user can execute in place of an already existing
+            command (Builtin or UNIX). If one arg is passed, then existing alias is removed.
+            If an alias for a command already exists, then the existing alias will be replaced.
+
+   @brief: Builtin command: newname <new_name> | newname <new_name> <old_name>
+   @param args List of args. args[0] is "newname". args[1] is the alias name.
+          args[2] is the command name.
+   @return Always returns 1, to continue executing.
  */
 int newname(char **args)
 {
 	if (args[1] == NULL) {
-		fprintf(stderr, "lsh: expected argument to \"newname\"\n");
+		fprintf(stderr, "tsh: expected argument to \"newname\"\n");
   } else if (args[2] == NULL) {	  // one argument: remove alias
     char *alias = args[1];
-    int alias_pos = get_alias_names_pos(alias);
+    int alias_pos = get_alias_index(alias);
 
     if (alias_pos == -1) {
-      fprintf(stderr, "lsh: alias \"%s\" does not exist\n", alias);
+      fprintf(stderr, "tsh: alias \"%s\" does not exist\n", alias);
     } else {
       alias_names[alias_pos] = "\0";
       alias_commands[alias_pos] = "\0";
 
-      //display_aliases();
     }
   } else if (args[3] == NULL) {	  // two arguments: add or replace alias
 	  char *alias_new = args[1];
     char *alias_cmd = args[2];
     
-    int alias_cmd_pos = get_alias_cmd_pos(alias_cmd);
-    int alias_new_pos = get_alias_names_pos(alias_new);
+    int alias_cmd_pos = get_cmd_index(alias_cmd);
+    int alias_new_pos = get_alias_index(alias_new);
 
     // TODO: make function for adding and removing aliases
     if (alias_new_pos != -1) {                // Replace command for an existing alias
@@ -225,20 +262,23 @@ int newname(char **args)
       }
 
       if (!alias_added) {
-        fprintf(stderr, "lsh: max number of aliases exceeded (%d)\n", ALIAS_SIZE);
+        fprintf(stderr, "tsh: max number of aliases exceeded (%d)\n", ALIAS_SIZE);
       }
     }
 
-    //display_aliases();
 	} else {
-		fprintf(stderr, "lsh: too many arguments to \"newname\"\n");
+		fprintf(stderr, "tsh: too many arguments to \"newname\"\n");
 	}
 
   return 1;
 }
 
-/*
- *
+/**
+   Purpose: Outputs all the aliases that have been defined by the user.
+
+   @brief: Builtin command: listnewnames
+   @param args List of args. args[0] is "listnewnames".
+   @return Always returns 1, to continue executing.
  */
 int listnewnames(char **args)
 {
@@ -251,19 +291,23 @@ int listnewnames(char **args)
   return 1;
 }
 
-/*
- *
+/**
+   Purpose: Stores all currently defined aliases in the file <file_name>
+
+   @brief: Builtin command: savenewnames <file_name>
+   @param args List of args. args[0] is "savenewnames". args[1] is a file name.
+   @return Always returns 1, to continue executing.
  */
 int savenewnames(char **args)
 {
   if (args[1] == NULL) {
-    fprintf(stderr, "lsh: expected argument to \"savenewnames\"\n");
+    fprintf(stderr, "tsh: expected argument to \"savenewnames\"\n");
     return 1;
   }
 
   FILE *fp = fopen(args[1], "w");
   if(fp == NULL) {
-    fprintf(stderr, "lsh: cannot open file\n");
+    fprintf(stderr, "tsh: cannot create file\n");
     return 1;
   }
 
@@ -278,21 +322,24 @@ int savenewnames(char **args)
   return 1;
 }
 
-/*
- *
+/**
+   Purpose: Reads all aliases in the file <file_name> and outputs to the user.
+
+   @brief: Builtin command: readnewnames <file_name>
+   @param args List of args. args[0] is "readnewnames". args[1] is a file name.
+   @return Always returns 1, to continue executing.
  */
 int readnewnames(char **args)
 {
   if (args[1] == NULL) {
-    fprintf(stderr, "lsh: expected argument to \"readnewnames\"\n");
+    fprintf(stderr, "tsh: expected argument to \"readnewnames\"\n");
     return 1;
   }
 
   FILE *fp;
   fp = fopen(args[1], "r");
-
   if (fp == NULL) {
-    fprintf(stderr, "lsh: file does not exist\n");
+    fprintf(stderr, "tsh: file does not exist\n");
     return 1;
   }
 
@@ -322,12 +369,12 @@ int lsh_launch(char **args)
   if (pid == 0) {
     // Child process
     if (execvp(args[0], args) == -1) {
-      perror("lsh");
+      perror("tsh");
     }
     exit(EXIT_FAILURE);
   } else if (pid < 0) {
     // Error forking
-    perror("lsh");
+    perror("tsh");
   } else {
     // Parent process
     do {
@@ -352,7 +399,7 @@ int lsh_execute(char **args)
     return 1;
   }
 
-  // If alias exists, replace 'args[0]' with corresponding command from list
+  // If alias exists, replace 'args[0]' with corresponding command
   for (int i = 0; i < ALIAS_SIZE; i++)  
   {
     if (strcmp(args[0], alias_names[i]) == 0) {
@@ -382,7 +429,7 @@ char *lsh_read_line(void)
     if (feof(stdin)) {
       exit(EXIT_SUCCESS);  // We recieved an EOF
     } else  {
-      perror("lsh: getline\n");
+      perror(strcat("lsh", ": getline\n"));
       exit(EXIT_FAILURE);
     }
   }
@@ -395,7 +442,7 @@ char *lsh_read_line(void)
   int c;
 
   if (!buffer) {
-    fprintf(stderr, "lsh: allocation error\n");
+    fprintf(stderr, "tsh: allocation error\n");
     exit(EXIT_FAILURE);
   }
 
@@ -418,7 +465,7 @@ char *lsh_read_line(void)
       bufsize += LSH_RL_BUFSIZE;
       buffer = realloc(buffer, bufsize);
       if (!buffer) {
-        fprintf(stderr, "lsh: allocation error\n");
+        fprintf(stderr, "tsh: allocation error\n");
         exit(EXIT_FAILURE);
       }
     }
@@ -440,7 +487,7 @@ char **lsh_split_line(char *line)
   char *token, **tokens_backup;
 
   if (!tokens) {
-    fprintf(stderr, "lsh: allocation error\n");
+    fprintf(stderr, "tsh: allocation error\n");
     exit(EXIT_FAILURE);
   }
 
@@ -455,7 +502,7 @@ char **lsh_split_line(char *line)
       tokens = realloc(tokens, bufsize * sizeof(char*));
       if (!tokens) {
 		free(tokens_backup);
-        fprintf(stderr, "lsh: allocation error\n");
+        fprintf(stderr, "tsh: allocation error\n");
         exit(EXIT_FAILURE);
       }
     }
@@ -481,8 +528,8 @@ void lsh_loop(void)
     args = lsh_split_line(line);
     status = lsh_execute(args);
 
-   // free(line);
-   // free(args);
+    //free(line);
+    //free(args);
   } while (status);
 }
 
