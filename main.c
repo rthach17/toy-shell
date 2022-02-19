@@ -1,9 +1,16 @@
-/***************************************************************************//**
-  @file         main.c
-  @author       Stephen Brennan
-  @date         Thursday,  8 January 2015
-  @brief        LSH (Libstephen SHell)
+/*******************************************************************************
+ * Credit
+ * ------
+ * Original Author: Stephen Brennan
+ * Original Program: LSH (Libstephen SHell)
 *******************************************************************************/
+
+/****************************************
+ * 
+ * 
+ * 
+ * 
+****************************************/
 
 #include <sys/wait.h>
 #include <sys/types.h>
@@ -181,7 +188,7 @@ int newname(char **args)
     int alias_pos = get_alias_names_pos(alias);
 
     if (alias_pos == -1) {
-      fprintf(stderr, "lsh: the alias \"%s\" does not exist\n", alias);
+      fprintf(stderr, "lsh: alias \"%s\" does not exist\n", alias);
     } else {
       alias_names[alias_pos] = "\0";
       alias_commands[alias_pos] = "\0";
@@ -256,7 +263,7 @@ int savenewnames(char **args)
 
   FILE *fp = fopen(args[1], "w");
   if(fp == NULL) {
-    fprintf(stderr, "lsh: file pointer error\n");
+    fprintf(stderr, "lsh: cannot open file\n");
     return 1;
   }
 
@@ -276,7 +283,26 @@ int savenewnames(char **args)
  */
 int readnewnames(char **args)
 {
-  printf("this is readnewnames command\n");
+  if (args[1] == NULL) {
+    fprintf(stderr, "lsh: expected argument to \"readnewnames\"\n");
+    return 1;
+  }
+
+  FILE *fp;
+  fp = fopen(args[1], "r");
+
+  if (fp == NULL) {
+    fprintf(stderr, "lsh: file does not exist\n");
+    return 1;
+  }
+
+  char c = fgetc(fp);
+  while (c != EOF) {
+    printf("%c", c);
+    c = fgetc(fp);
+  }
+
+  fclose(fp);
 
   return 1;
 }
