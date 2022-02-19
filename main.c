@@ -22,13 +22,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#define ALIAS_SIZE 10
 
 /*
   Global variables used by built-in shell commands:
  */
 char *shellname = "myshell";
 char *terminator = ">";
-const int ALIAS_SIZE = 10;
 char *alias_names[ALIAS_SIZE] = { "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0" };
 char *alias_commands[ALIAS_SIZE] = { "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0" };
 
