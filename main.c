@@ -113,6 +113,19 @@ int get_cmd_index(char *cmd) {
   return -1;
 }
 
+void remove_alias(char *alias)
+{
+    int alias_index = get_alias_index(alias);
+
+    if (alias_index == -1) {
+      fprintf(stderr, "tsh: alias \"%s\" does not exist\n", alias);
+    } else {
+      alias_names[alias_index] = "\0";
+      alias_commands[alias_index] = "\0";
+    }
+}
+
+
 /*
   Builtin function implementations.
 */
@@ -162,7 +175,7 @@ int lsh_help(char **args)
    Purpose: Terminates execution of Toy SHell.
 
    @brief: Builtin command: stop
-   @param args List of args.  Not examined.
+   @param args List of args. Not examined.
    @return Always returns 0
  */
 int stop(char **args)
@@ -175,7 +188,9 @@ int stop(char **args)
             change to default shell name "myshell".
 
    @brief: Builtin command: setshellname <name>
-   @param args List of args.  args[0] is "setshellname".  args[1] is custom shell name.
+   @param args List of args.
+          args[0] is "setshellname".
+          args[1] is custom shell name.
    @return Always returns 1, to continue executing.
  */
 int setshellname(char **args)
@@ -193,7 +208,9 @@ int setshellname(char **args)
             change to default terminator ">".
 
    @brief: Builtin command: setterminator <name>
-   @param args List of args. args[0] is "setterminator". args[1] is custom terminator name.
+   @param args List of args.
+          args[0] is "setterminator". 
+          args[1] is custom terminator name.
    @return Always returns 1, to continue executing.
  */
 int setterminator(char **args)
@@ -208,12 +225,13 @@ int setterminator(char **args)
 }
 
 /**
-   Purpose: Define a custom alias that the user can execute in place of an already existing
-            command (Builtin or UNIX). If one arg is passed, then existing alias is removed.
-            If an alias for a command already exists, then the existing alias will be replaced.
+   Purpose: Define a custom alias that the user can execute in place of a 
+            builtin or UNIX command. Can remove or replace existing aliases.
 
    @brief: Builtin command: newname <new_name> | newname <new_name> <old_name>
-   @param args List of args. args[0] is "newname". args[1] is the alias name.
+   @param args List of args. 
+          args[0] is "newname".
+          args[1] is the alias name.
           args[2] is the command name.
    @return Always returns 1, to continue executing.
  */
@@ -221,18 +239,12 @@ int newname(char **args)
 {
 	if (args[1] == NULL) {
 		fprintf(stderr, "tsh: expected argument to \"newname\"\n");
-  } else if (args[2] == NULL) {	  // one argument: remove alias
-    char *alias = args[1];
-    int alias_pos = get_alias_index(alias);
-
-    if (alias_pos == -1) {
-      fprintf(stderr, "tsh: alias \"%s\" does not exist\n", alias);
-    } else {
-      alias_names[alias_pos] = "\0";
-      alias_commands[alias_pos] = "\0";
-
-    }
-  } else if (args[3] == NULL) {	  // two arguments: add or replace alias
+  } 
+  else if (args[2] == NULL) 
+  {
+    remove_alias(args[1]);
+  } 
+  else if (args[3] == NULL) {	  // two arguments: add or replace alias
 	  char *alias_new = args[1];
     char *alias_cmd = args[2];
     
@@ -295,7 +307,9 @@ int listnewnames(char **args)
    Purpose: Stores all currently defined aliases in the file <file_name>
 
    @brief: Builtin command: savenewnames <file_name>
-   @param args List of args. args[0] is "savenewnames". args[1] is a file name.
+   @param args List of args.
+          args[0] is "savenewnames".
+          args[1] is a file name.
    @return Always returns 1, to continue executing.
  */
 int savenewnames(char **args)
@@ -326,7 +340,9 @@ int savenewnames(char **args)
    Purpose: Reads all aliases in the file <file_name> and outputs to the user.
 
    @brief: Builtin command: readnewnames <file_name>
-   @param args List of args. args[0] is "readnewnames". args[1] is a file name.
+   @param args List of args.
+          args[0] is "readnewnames".
+          args[1] is a file name.
    @return Always returns 1, to continue executing.
  */
 int readnewnames(char **args)
