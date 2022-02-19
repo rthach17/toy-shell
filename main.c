@@ -8,7 +8,7 @@
 /************************************************************
  * Name: Ravy Thach
  * ID: 004992997
- * Date: 2/21/2022
+ * Date: 2/18/2022
  * 
  * Purpose: A shell program, TSH (Toy SHell), that 
  *          can execute custom built-in commands 
@@ -199,7 +199,7 @@ int lsh_cd(char **args)
     if (chdir(args[1]) != 0)
       perror("tsh");
   }
-  
+
   return 1;
 }
 
