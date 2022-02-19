@@ -190,13 +190,16 @@ void remove_alias(char *alias)
  */
 int lsh_cd(char **args)
 {
-  if (args[1] == NULL) {
+  if (args[1] == NULL)
+  {
     fprintf(stderr, "tsh: expected argument to \"cd\"\n");
-  } else {
-    if (chdir(args[1]) != 0) {
-      perror("tsh");
-    }
   }
+  else
+  {
+    if (chdir(args[1]) != 0)
+      perror("tsh");
+  }
+  
   return 1;
 }
 
@@ -266,11 +269,10 @@ int setshellname(char **args)
  */
 int setterminator(char **args)
 {
-	if (args[1] == NULL) {
+	if (args[1] == NULL)
 		terminator = ">";
-	} else {
+	else
 		terminator = args[1];
-	}
 
 	return 1;
 }
@@ -288,21 +290,14 @@ int setterminator(char **args)
  */
 int newname(char **args)
 {
-	if (args[1] == NULL) {
+	if (args[1] == NULL)
 		fprintf(stderr, "tsh: expected argument to \"newname\"\n");
-  } 
   else if (args[2] == NULL) // User inputs one argument
-  {
     remove_alias(args[1]);
-  } 
   else if (args[3] == NULL) // User inputs two arguments
-  {
 	  add_alias(args[1], args[2]);
-	} 
   else 
-  {
 		fprintf(stderr, "tsh: too many arguments to \"newname\"\n");
-	}
 
   return 1;
 }
@@ -336,17 +331,24 @@ int listnewnames(char **args)
  */
 int savenewnames(char **args)
 {
-  if (args[1] == NULL) {
+  FILE *fp;
+
+  if (args[1] == NULL)
+  {
     fprintf(stderr, "tsh: expected argument to \"savenewnames\"\n");
     return 1;
   }
 
-  FILE *fp = fopen(args[1], "w");
-  if(fp == NULL) {
+  fp = fopen(args[1], "w");
+
+  // File pointer error
+  if(fp == NULL)
+  {
     fprintf(stderr, "tsh: cannot create file\n");
     return 1;
   }
 
+  // Write alias entries to file
   for (int i = 0; i < ALIAS_SIZE; i++)
   {
     if (strcmp(alias_names[i], "\0") != 0)
@@ -368,23 +370,28 @@ int savenewnames(char **args)
  */
 int readnewnames(char **args)
 {
-  if (args[1] == NULL) {
+  FILE *fp;
+  char c;
+
+  if (args[1] == NULL)
+  {
     fprintf(stderr, "tsh: expected argument to \"readnewnames\"\n");
     return 1;
   }
 
-  FILE *fp;
   fp = fopen(args[1], "r");
 
   // File not found
-  if (fp == NULL) {
+  if (fp == NULL)
+  {
     fprintf(stderr, "tsh: file does not exist\n");
     return 1;
   }
 
-  // Output file to user
-  char c = fgetc(fp);
-  while (c != EOF) {
+  // Output file contents to user
+  c = fgetc(fp);
+  while (c != EOF)
+  {
     printf("%c", c);
     c = fgetc(fp);
   }
@@ -405,18 +412,25 @@ int lsh_launch(char **args)
   int status;
 
   pid = fork();
-  if (pid == 0) {
+  if (pid == 0)
+  {
     // Child process
-    if (execvp(args[0], args) == -1) {
+    if (execvp(args[0], args) == -1)
+    {
       perror("tsh");
     }
     exit(EXIT_FAILURE);
-  } else if (pid < 0) {
+  }
+  else if (pid < 0)
+  {
     // Error forking
     perror("tsh");
-  } else {
+  }
+  else
+  {
     // Parent process
-    do {
+    do 
+    {
       waitpid(pid, &status, WUNTRACED);
     } while (!WIFEXITED(status) && !WIFSIGNALED(status));
   }
@@ -433,23 +447,23 @@ int lsh_execute(char **args)
 {
   int i;
 
-  if (args[0] == NULL) {
+  if (args[0] == NULL) 
+  {
     // An empty command was entered.
     return 1;
   }
 
-  // If alias exists, replace 'args[0]' with corresponding command
+  // If arg is an alias, replace arg with corresponding command string
   for (int i = 0; i < ALIAS_SIZE; i++)  
   {
-    if (strcmp(args[0], alias_names[i]) == 0) {
+    if (strcmp(args[0], alias_names[i]) == 0)
       args[0] = alias_commands[i];
-    }
   }
 
-  for (i = 0; i < lsh_num_builtins(); i++) {
-    if (strcmp(args[0], builtin_str[i]) == 0) {
+  for (i = 0; i < lsh_num_builtins(); i++)
+  {
+    if (strcmp(args[0], builtin_str[i]) == 0)
       return (*builtin_func[i])(args);
-    }
   }
 
   return lsh_launch(args);
@@ -464,10 +478,14 @@ char *lsh_read_line(void)
 #ifdef LSH_USE_STD_GETLINE
   char *line = NULL;
   ssize_t bufsize = 0; // have getline allocate a buffer for us
-  if (getline(&line, &bufsize, stdin) == -1) {
-    if (feof(stdin)) {
+  if (getline(&line, &bufsize, stdin) == -1) 
+  {
+    if (feof(stdin)) 
+    {
       exit(EXIT_SUCCESS);  // We recieved an EOF
-    } else  {
+    }
+    else  
+    {
       perror(strcat("lsh", ": getline\n"));
       exit(EXIT_FAILURE);
     }
@@ -480,7 +498,8 @@ char *lsh_read_line(void)
   char *buffer = malloc(sizeof(char) * bufsize);
   int c;
 
-  if (!buffer) {
+  if (!buffer) 
+  {
     fprintf(stderr, "tsh: allocation error\n");
     exit(EXIT_FAILURE);
   }
@@ -489,21 +508,28 @@ char *lsh_read_line(void)
     // Read a character
     c = getchar();
 
-    if (c == EOF) {
+    if (c == EOF) 
+    {
       exit(EXIT_SUCCESS);
-    } else if (c == '\n') {
+    } 
+    else if (c == '\n') 
+    {
       buffer[position] = '\0';
       return buffer;
-    } else {
+    } 
+    else
+    {
       buffer[position] = c;
     }
     position++;
 
     // If we have exceeded the buffer, reallocate.
-    if (position >= bufsize) {
+    if (position >= bufsize) 
+    {
       bufsize += LSH_RL_BUFSIZE;
       buffer = realloc(buffer, bufsize);
-      if (!buffer) {
+      if (!buffer) 
+      {
         fprintf(stderr, "tsh: allocation error\n");
         exit(EXIT_FAILURE);
       }
@@ -525,22 +551,26 @@ char **lsh_split_line(char *line)
   char **tokens = malloc(bufsize * sizeof(char*));
   char *token, **tokens_backup;
 
-  if (!tokens) {
+  if (!tokens)
+  {
     fprintf(stderr, "tsh: allocation error\n");
     exit(EXIT_FAILURE);
   }
 
   token = strtok(line, LSH_TOK_DELIM);
-  while (token != NULL) {
+  while (token != NULL) 
+  {
     tokens[position] = token;
     position++;
 
-    if (position >= bufsize) {
+    if (position >= bufsize) 
+    {
       bufsize += LSH_TOK_BUFSIZE;
       tokens_backup = tokens;
       tokens = realloc(tokens, bufsize * sizeof(char*));
-      if (!tokens) {
-		free(tokens_backup);
+      if (!tokens) 
+      {
+		    free(tokens_backup);
         fprintf(stderr, "tsh: allocation error\n");
         exit(EXIT_FAILURE);
       }
@@ -561,7 +591,8 @@ void lsh_loop(void)
   char **args;
   int status;
 
-  do {
+  do 
+  {
     printf("%s %s ", shellname, terminator);
     line = lsh_read_line();
     args = lsh_split_line(line);
@@ -584,8 +615,6 @@ int main(int argc, char **argv)
 
   // Run command loop.
   lsh_loop();
-
-  // Perform any shutdown/cleanup.
 
   return EXIT_SUCCESS;
 }
