@@ -80,46 +80,81 @@ int lsh_num_builtins() {
 }
 
 /**
-   Purpose: Retrieves index of alias from alias_names list
+   Purpose: Retrieves index of string found in list of strings (array)
 
-   @param alias String of alias to check
-   @return If alias found, returns index
-   @return if alias not found, returns -1
+   @param str String of element to check
+          list Array of strings to find str
+          size Size of array
+   @return If element found, returns index of element
+   @return if element not found, returns -1
  */
-int get_alias_index(char *alias) {
-  for (int i = 0; i < ALIAS_SIZE; i++)
+int get_index_from_list(char *str, char *list[], int size) {
+  for (int i = 0; i < size; i++)
   {
-    if (strcmp(alias_names[i], alias) == 0)
+    if (strcmp(list[i], str) == 0)
       return i;
   }
 
   return -1;
 }
 
-/**
-   Purpose: Retrieve index of command from alias_commands list
+void add_alias(char* alias, char* command)
+{
+  char *alias_new = alias;
+  char *alias_cmd = command;
+  
+  int alias_new_idx = get_index_from_list(alias_new, alias_names, ALIAS_SIZE);
+  int alias_cmd_idx = get_index_from_list(alias_cmd, alias_commands, ALIAS_SIZE);
 
-   @param alias String of command to check
-   @return If command found, returns index
-   @return if command not found, returns -1
- */
-int get_cmd_index(char *cmd) {
-  for (int i = 0; i < ALIAS_SIZE; i++)
+  // If alias already exists, replace alias with new one
+  if (alias_new_idx != -1)
   {
-    if (strcmp(alias_commands[i], cmd) == 0)
-      return i;
-  }
+    alias_names[alias_new_idx] = alias_new;
+    alias_commands[alias_new_idx] = alias_cmd;
+  } 
+  // If command already has an alias, replace alias with new one
+  else if (alias_cmd_idx != -1)
+  {
+    alias_names[alias_cmd_idx] = alias_new;
+    alias_commands[alias_cmd_idx] = alias_cmd;
+  } 
+  else 
+  {
+    // Otherwise, add new alias
+    int alias_added = 0;
+    for (int i = 0; i < ALIAS_SIZE; i++) 
+    {
+      // Add alias to an empty entry
+      if (strcmp(alias_names[i], "\0") == 0) 
+      {
+        alias_names[i] = alias_new;
+        alias_commands[i] = alias_cmd;
+        alias_added = 1;
+      }
 
-  return -1;
+      if (alias_added)
+        break;
+    }
+
+    // Alias list is full
+    if (!alias_added) 
+    {
+      fprintf(stderr, "tsh: max number of aliases exceeded (%d)\n", ALIAS_SIZE);
+    }
+  }
 }
 
 void remove_alias(char *alias)
 {
-    int alias_index = get_alias_index(alias);
+    int alias_index = get_index_from_list(alias, alias_names, ALIAS_SIZE);
 
-    if (alias_index == -1) {
+    if (alias_index == -1)
+    {
       fprintf(stderr, "tsh: alias \"%s\" does not exist\n", alias);
-    } else {
+    } 
+    else
+    {
+      // Remove alias entry
       alias_names[alias_index] = "\0";
       alias_commands[alias_index] = "\0";
     }
@@ -240,45 +275,16 @@ int newname(char **args)
 	if (args[1] == NULL) {
 		fprintf(stderr, "tsh: expected argument to \"newname\"\n");
   } 
-  else if (args[2] == NULL) 
+  else if (args[2] == NULL) // User inputs one argument
   {
     remove_alias(args[1]);
   } 
-  else if (args[3] == NULL) {	  // two arguments: add or replace alias
-	  char *alias_new = args[1];
-    char *alias_cmd = args[2];
-    
-    int alias_cmd_pos = get_cmd_index(alias_cmd);
-    int alias_new_pos = get_alias_index(alias_new);
-
-    // TODO: make function for adding and removing aliases
-    if (alias_new_pos != -1) {                // Replace command for an existing alias
-      alias_names[alias_new_pos] = alias_new;
-      alias_commands[alias_new_pos] = alias_cmd;
-
-    } else if (alias_cmd_pos != -1) {         // Replace alias for corresponding command
-      alias_names[alias_cmd_pos] = alias_new;
-      alias_commands[alias_cmd_pos] = alias_cmd;
-
-    } else {
-      int alias_added = 0;                    // Add new alias
-      for (int i = 0; i < ALIAS_SIZE; i++) {
-        if (strcmp(alias_names[i], "\0") == 0) {
-          alias_names[i] = alias_new;
-          alias_commands[i] = alias_cmd;
-          alias_added = 1;
-        }
-
-        if (alias_added)
-          break;
-      }
-
-      if (!alias_added) {
-        fprintf(stderr, "tsh: max number of aliases exceeded (%d)\n", ALIAS_SIZE);
-      }
-    }
-
-	} else {
+  else if (args[3] == NULL) // User inputs two arguments
+  {
+	  add_alias(args[1], args[2]);
+	} 
+  else 
+  {
 		fprintf(stderr, "tsh: too many arguments to \"newname\"\n");
 	}
 
@@ -332,7 +338,6 @@ int savenewnames(char **args)
   }
 
   fclose(fp);
-
   return 1;
 }
 
@@ -354,11 +359,14 @@ int readnewnames(char **args)
 
   FILE *fp;
   fp = fopen(args[1], "r");
+
+  // File not found
   if (fp == NULL) {
     fprintf(stderr, "tsh: file does not exist\n");
     return 1;
   }
 
+  // Output file to user
   char c = fgetc(fp);
   while (c != EOF) {
     printf("%c", c);
@@ -366,7 +374,6 @@ int readnewnames(char **args)
   }
 
   fclose(fp);
-
   return 1;
 }
 
